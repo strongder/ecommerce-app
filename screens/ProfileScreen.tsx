@@ -1,4 +1,5 @@
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -8,81 +9,66 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/AuthSlice";
+import { fetchCurrentUser } from "../redux/UserSlice";
+import { configAxios } from "../api";
 
 const ProfileScreen = ({ navigation }: any) => {
-  const handleLogout = () => {
+  const dispatch = useDispatch();
+  const handleLogout = async () => {
+    await dispatch(logout());
+    console.log(AsyncStorage.getItem("token"));
     navigation.navigate("Login");
   };
-  // Dữ liệu hồ sơ mẫu
-  const profileData = {
-    avatarUrl:
-      "https://th.bing.com/th/id/OIP.T3gMvmoO0cxYUWgp7K8LXAHaLH?w=228&h=342&c=7&o=5&dpr=1.1&pid=1.20", // Link ảnh đại diện
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+123456789",
-    address: "123 Main St, City, Country",
-  };
 
-  // Dữ liệu lịch sử thanh toán mẫu
-  const paymentHistory = [
-    { id: 1, amount: "$120.00", date: "2023-09-01", status: "Completed" },
-    { id: 2, amount: "$55.50", date: "2023-08-15", status: "Pending" },
-  ];
-
-  // Dữ liệu lịch sử đơn hàng mẫu
-  const orderHistory = [
-    {
-      id: 1,
-      product: "Nike Air Max 90",
-      date: "2023-09-10",
-      status: "Delivered",
-    },
-    {
-      id: 2,
-      product: "Adidas Ultraboost",
-      date: "2023-08-20",
-      status: "Shipped",
-    },
-  ];
-
-  const renderPaymentItem = ({ item }: any) => (
-    <View style={styles.historyItem}>
-      <Text style={styles.historyText}>Amount: {item.amount}</Text>
-      <Text style={styles.historyText}>Date: {item.date}</Text>
-      <Text style={styles.historyText}>Status: {item.status}</Text>
-    </View>
-  );
+  const currentUser = useSelector((state: any) => state.users.currentUser);
+  
+  configAxios(navigation);
+  useEffect(() => {
+    dispatch(fetchCurrentUser());
+  }, [dispatch]);
 
   return (
     <ScrollView style={styles.container}>
-      {/* Phần ảnh đại diện và tên */}
-      <View style={styles.header}>
-        <Image source={{ uri: profileData.avatarUrl }} style={styles.avatar} />
-        <Text style={styles.name}>{profileData.name}</Text>
-        <Text style={styles.email}>{profileData.email}</Text>
-      </View>
+      {currentUser && (
+        <>
+          <View style={styles.header}>
+            <Image
+              source={{ uri: currentUser?.avatar }}
+              style={styles.avatar}
+            />
+            <Text style={styles.name}>{currentUser?.username}</Text>
+            <Text style={styles.email}>{currentUser?.email}</Text>
+          </View>
 
-      {/* Thông tin cá nhân */}
-      <View style={styles.infoContainer}>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoTitle}>Phone:</Text>
-          <Text style={styles.infoValue}>{profileData.phone}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoTitle}>Address:</Text>
-          <Text style={styles.infoValue}>{profileData.address}</Text>
-        </View>
-      </View>
-
+          {/* Thông tin cá nhân */}
+          <View style={styles.infoContainer}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoTitle}>FullName</Text>
+              <Text style={styles.infoValue}>{currentUser?.fullname}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoTitle}>Phone</Text>
+              <Text style={styles.infoValue}>{currentUser?.phone}</Text>
+            </View>
+          </View>
+        </>
+      )}
       <View style={styles.historySection}>
-        <TouchableOpacity onPress={() => navigation.navigate("OrderHistory")}>
-
-        <Text style={styles.sectionTitle}>Lịch sử đơn hàng</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Address")}>
+          <Text style={styles.sectionTitle}>Địa chỉ</Text>
         </TouchableOpacity>
       </View>
-      {/* Lịch sử thanh toán */}
       <View style={styles.historySection}>
-        <Text style={styles.sectionTitle}>Lịch sử thanh toán</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("PaymentHistory")}>
+          <Text style={styles.sectionTitle}>Lịch sử thanh toán</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.historySection}>
+        <TouchableOpacity onPress={() => navigation.navigate("OrderHistory")}>
+          <Text style={styles.sectionTitle}>Lịch sử đơn hàng</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
@@ -101,7 +87,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 16,
-    paddingTop: 30,
+    paddingTop: 50,
   },
   header: {
     alignItems: "center",

@@ -3,22 +3,22 @@ import { View, Text, Image, StyleSheet, FlatList } from "react-native";
 const OrderItem = ({ item }: any) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.status}>Trạng thái: {item.status}</Text>
+      <Text style={styles.status}>Trạng thái: {item?.status}</Text>
       <FlatList
         style={styles.list}
-        data={item.orderItems}
+        data={item?.orderItems}
         renderItem={({ item }: any) => (
           <View style={{ flexDirection: "row", gap: 20 }}>
-            <Image source={{ uri: item.image }} style={styles.image} />
+            <Image source={{ uri: item?.image }} style={styles.image} />
             <View>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.quantity}>Số lượng: {item.quantity}</Text>
-              <Text style={styles.price}>Đơn giá: {item.price} VNĐ</Text>
+              <Text style={styles.name}>{item?.name}</Text>
+              <Text style={styles.quantity}>Số lượng: {item?.quantity}</Text>
+              <Text style={styles.price}>Đơn giá: {item?.price} VNĐ</Text>
             </View>
           </View>
         )}
       />
-      <Text style={styles.totalPrice}>Tổng giá: {item.total} VNĐ</Text>
+      <Text style={styles.totalPrice}>Tổng giá: {item?.total} VNĐ</Text>
     </View>
   );
 };

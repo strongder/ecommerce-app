@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
 interface CartItemProps {
@@ -16,9 +16,11 @@ interface CartItemProps {
     delete: boolean;
   }, 
   onRemove: (id: number) => void
+  onUpdate: (id: number, quantity: number) => void
 }
-const CartItem: React.FC<CartItemProps> = ({ cartItem, onRemove }) => {
-  const [quantity, setQuantity] = useState(cartItem.quantity);
+const CartItem: React.FC<CartItemProps> = ({ cartItem, onRemove, onUpdate }) => {
+  const [quantity, setQuantity] = useState<number>(cartItem.quantity);
+  console.log("checi-----",cartItem);
 
   const increaseQuantity = () => {
     setQuantity(quantity + 1);
@@ -29,6 +31,12 @@ const CartItem: React.FC<CartItemProps> = ({ cartItem, onRemove }) => {
       setQuantity(quantity - 1);
     }
   };
+  const handleUpdate = () => {
+    onUpdate(cartItem.id, quantity);
+  }
+  useEffect(() => {
+    handleUpdate();
+  }, [quantity]);
 
   return (
     <View style={styles.container}>
@@ -37,7 +45,7 @@ const CartItem: React.FC<CartItemProps> = ({ cartItem, onRemove }) => {
         <Text style={styles.name}>{cartItem.name}</Text>
         <Text style={styles.price}>{Object.keys(cartItem.varProduct.attribute).map((key) => cartItem.varProduct.attribute[key])
       .join(", ")}</Text>
-        <Text style={styles.price}>{cartItem.price} VNĐ</Text>
+        <Text style={styles.price}>{cartItem.price.toLocaleString("de-DE")} VNĐ</Text>
         <View style={styles.quantityContainer}>
           <TouchableOpacity onPress={decreaseQuantity} style={styles.button}>
             <Text style={styles.buttonText}>-</Text>

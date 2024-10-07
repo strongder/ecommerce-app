@@ -8,6 +8,7 @@ const ProductItem = ({ product }: any) => {
       <View style={styles.info}>
         <Text style={styles.name}>{product.name}</Text>
         <Text style={styles.price}>{product.price} VNĐ</Text>
+        <Text style={styles.sold}>Đã bán: {product.quantitySold}</Text>
         <Text style={styles.rating}>Đánh giá: {product.rating} ⭐</Text>
       </View>
     </View>
@@ -41,6 +42,10 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 14,
     color: "#e91e63",
+  },
+  sold: {
+    fontSize: 12,
+    color: "#666",
   },
   rating: {
     fontSize: 12,

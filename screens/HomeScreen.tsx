@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -13,28 +13,44 @@ import {
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { products, categories } from "../data";
 import ProductItem from "../components/ProductItem";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCategory, fetchCategoryById } from "../redux/CategorySlice";
+import { fetchProduct, fetchProductByCategory } from "../redux/ProductSlice";
 
 const HomeScreen = () => {
   const navigation: any = useNavigation();
   const [searchTerm, setSearchTerm] = useState("");
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state: any) => state.categories);
+  const { listProduct } = useSelector((state: any) => state.products);
+  useEffect(() => {
+    dispatch(fetchCategory());
+  }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(fetchProduct());
+  }, [dispatch]);
   const handleSearch = () => {
     console.log(searchTerm);
     navigation.navigate("SearchPage", { key: searchTerm });
+  };
+
+  const handleSelectCategory = async (id: number) => {
+     await dispatch(fetchCategoryById(id));
+     await dispatch(fetchProductByCategory(id));
+     navigation.navigate("Category");
   };
   const renderProductList = (title: string, data: any) => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <FlatList
-        // contentContainerStyle={styles.listProduct}
         scrollEnabled={false}
         data={data}
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
-              navigation.navigate("ProductDetail", { product: item })
+              navigation.navigate("ProductDetail", {productId: item.id})
             }
             style={styles.productItem}
           >
@@ -83,33 +99,39 @@ const HomeScreen = () => {
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
             <Text style={styles.sectionTitle}>Danh mục</Text>
-            <Text style={{alignItems: "center"}} onPress={()=>navigation.navigate("Category")}>
+            <Text
+              style={{ alignItems: "center" }}
+              onPress={() => handleSelectCategory(1)}
+            >
               Chi tiết
               <AntDesign name="right" size={18} color="black" />
             </Text>
           </View>
-          <FlatList
-            horizontal
-            scrollEnabled={true}
-            data={categories}
-            renderItem={({ item }) => (
-              <Pressable
-             style={styles.categoryItem}
-                onPress={() =>
-                  navigation.navigate("Category", { category: item })
-                }
-              >
-                <View style={{ alignItems: 'center', gap: 20}}>
-                  <Image source={{ uri: item.image }} style={{ width: 80, height: 80, borderRadius: 50}}></Image>
-                  <Text style={styles.categoryText}>{item.name}</Text>
-                </View>
-              </Pressable>
-            )}
-            keyExtractor={(item) => item.id.toString()}
-            showsHorizontalScrollIndicator={true}
-          />
+          {categories && (
+            <FlatList
+              horizontal
+              scrollEnabled={true}
+              data={categories}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={styles.categoryItem}
+                  onPress={() => handleSelectCategory(item.id)}
+                >
+                  <View style={{ alignItems: "center", gap: 20 }}>
+                    <Image
+                      source={{ uri: item.image }}
+                      style={{ width: 80, height: 80, borderRadius: 50 }}
+                    ></Image>
+                    <Text style={styles.categoryText}>{item.name}</Text>
+                  </View>
+                </Pressable>
+              )}
+              keyExtractor={(item) => item.id.toString()}
+              showsHorizontalScrollIndicator={true}
+            />
+          )}
         </View>
-        {renderProductList("Featured Products", products)}
+        {listProduct && renderProductList("Featured Products", listProduct)}
       </ScrollView>
     </SafeAreaView>
   );
@@ -120,12 +142,10 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 30,
+    paddingTop: 50,
     backgroundColor: "white",
   },
-  listProduct: {
-    
-  },
+  listProduct: {},
   productItem: {
     flex: 1,
     margin: 5, // Thêm khoảng cách 10 giữa các sản phẩm (5 cho mỗi bên)

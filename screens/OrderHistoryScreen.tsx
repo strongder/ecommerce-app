@@ -1,26 +1,47 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
 } from "react-native";
-import { orders } from "../data";
 import OrderItem from "../components/OrderItem";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchOrderByUser } from "../redux/OrderSlice";
+
 const OrderHistoryScreen = ({ navigation }: any) => {
   const [selectedStatus, setSelectedStatus] = useState("ALL");
+  const dispatch = useDispatch();
+  const orders = useSelector((state: any) => state.orders.listOrderByUser) || []; // Ensure it's an array
+  const currentUser = useSelector((state: any) => state.users.currentUser);
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      
+      dispatch(fetchOrderByUser(currentUser.id));
+    }
+  }, [dispatch, currentUser]);
 
   const filteredOrders =
     selectedStatus === "ALL"
-      ? orders
-      : orders.filter((order) => order.status === selectedStatus);
+      ? orders.filter((order: any) => order) // Filter out undefined items
+      : orders.filter((order: any) => order?.status === selectedStatus);
 
   return (
     <View style={styles.container}>
-      <View style={styles.topbar}>
-        {["ALL", "PENDING", "SHIPPING", "COMPLETED", "CANCELLED"].map(
-          (status) => (
+      <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+        <View style={styles.topbar}>
+          {[
+            "ALL",
+            "PENDING",
+            "PENDING PAYMENT",
+            "PROCESSING",
+            "COMPLETED",
+            "CANCELLED",
+            "PAID",
+          ].map((status) => (
             <TouchableOpacity
               key={status}
               onPress={() => setSelectedStatus(status)}
@@ -36,38 +57,45 @@ const OrderHistoryScreen = ({ navigation }: any) => {
                 {status}
               </Text>
             </TouchableOpacity>
-          )
-        )}
-      </View>
-      <FlatList
-        data={filteredOrders}
-        renderItem={({ item }: any) => (
-          <TouchableOpacity
-            onPress={() => navigation.navigate("OrderDetail", { order: item })}
-          >
-            <OrderItem item={item} />
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      />
+          ))}
+        </View>
+      </ScrollView>
+
+      {filteredOrders.length > 0 && (
+        <FlatList
+          data={filteredOrders}
+          renderItem={({ item }) => {
+            if (!item || !item.id) return null; // Check if item is valid
+            return (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("OrderDetail", { orderId: item.id })
+                }
+              >
+                <OrderItem item={item} />
+              </TouchableOpacity>
+            );
+          }}
+          keyExtractor={(item) => (item && item.id ? item.id.toString() : Math.random().toString())} // Fallback key
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    justifyContent: "flex-start",
     padding: 16,
+    paddingBottom: 60
   },
   topbar: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    paddingBottom: 10,
   },
   topbarItem: {
     paddingVertical: 10,
+    paddingHorizontal: 15, // Thêm khoảng cách giữa các nút
   },
   activeText: {
     fontWeight: "bold",

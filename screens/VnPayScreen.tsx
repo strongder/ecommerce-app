@@ -1,20 +1,48 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
-import {WebView} from "react-native-webview";
+import { View, ActivityIndicator, StyleSheet, Alert } from "react-native";
+import WebView from "react-native-webview";
 
-const VnPayScreen = () => {
+const VnPayScreen = ({ route, navigation}: any) => {
+  const { paymentUrl } = route.params;
   const [loading, setLoading] = useState(true);
-  // const [paymentUrl, setPaymentUrl] = useState(
-  //   "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=40000000&vnp_Command=pay&vnp_CreateDate=20240926201818&vnp_CurrCode=VND&vnp_ExpireDate=20240926203318&vnp_IpAddr=0%3A0%3A0%3A0%3A0%3A0%3A0%3A1&vnp_Locale=vn&vnp_OrderInfo=Thanh+to%3Fn+%3F%3Fn+h%3F%3Fng+%235&vnp_OrderType=other&vnp_ReturnUrl=http%3A%2F%2Flocalhost%3A8080%2Fapi%2Fv1%2Fpayment%2Fvn-pay-callback&vnp_TmnCode=B392S5MZ&vnp_TxnRef=20201514&vnp_Version=2.1.0&vnp_SecureHash=1d09a7b12301db04ee12ad6df2a579756fbc7a1342b7bd35f15feff9f4327f27afeaf5a966e7ecc716d5602fb425f454670ad4bf744407cfcf85f61775c673a2"
-  // );
+  
+
+  const handleNavigationStateChange = (navState: any) => {
+    console.log("Navigation State:", navState);
+
+    // Kiểm tra xem có chuyển hướng đến URL callback không
+    if (navState.url.includes('vnpay-callback')) {
+
+      const urlParams = new URLSearchParams(navState.url.split('?')[1]);
+      const paymentStatus = urlParams.get('vnp_ResponseCode');
+      
+      if (paymentStatus === '00') {
+        Alert.alert("Thông báo", "Thanh toán thành công!", [
+          { text: "OK", onPress: () => navigation.goBack() } // Trở lại màn hình trước
+        ]);
+      } else {
+        Alert.alert("Thông báo", "Thanh toán thất bại!", [
+          { text: "OK", onPress: () => navigation.goBack() } // Trở lại màn hình trước
+        ]);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <WebView
-        source={{ uri: "https://reactnative.dev/" }}
-        style={{ flex: 1 }}
-      />
-    </View>
+    {loading && <ActivityIndicator size="large" color="#0000ff" />}
+    <WebView
+      source={{ uri: paymentUrl }}
+      style={styles.webview}
+      onLoadStart={() => setLoading(true)} // Bắt đầu tải
+      onLoadEnd={() => setLoading(false)} // Tải xong
+      onHttpError={(syntheticEvent) => {
+        const { nativeEvent } = syntheticEvent;
+        console.warn("HTTP Error: ", nativeEvent);
+      }}
+      onNavigationStateChange={handleNavigationStateChange} // Xử lý thay đổi trạng thái điều hướng
+    />
+  </View>
   );
 };
 

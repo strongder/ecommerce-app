@@ -7,62 +7,65 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import CartItem from "../components/CartItem";
-import { carts } from "../data";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { removeProductFromCart, updateProductInCart } from "../redux/CartSlice";
 
-
-const CartScreen= ({ navigation }: any) => {
-  const [cartItems, setCartItems] = useState<any>([]);
-
-  const [total, setTotal] = useState<number>(0);
-
-  useEffect(() => {
-    calculateTotal();
-  }, [cartItems]);
-
-  const calculateTotal = (): void => {
-    const newTotal = cartItems.reduce(
-      (sum: number, item: any) => sum + item.price * item.quantity,
-      0
-    );
-    setTotal(newTotal);
+const CartScreen = ({ navigation }: any) => {
+  const dispatch = useDispatch();
+  const  {cart} : any = useSelector((state: RootState) => state.carts);
+  const currentUser: any = useSelector(
+    (state: RootState) => state.users.currentUser
+  );
+  const handleCheckout = () => {
+    console.log("dsafsd",cart);
+    navigation.navigate("Checkout", {cart : cart});
   };
-
-  const updateQuantity = (id: string, newQuantity: number): void => {
-    if (newQuantity < 1) return;
-    const updatedItems = cartItems.map((item: any) =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    );
-    setCartItems(updatedItems);
-  };
-
-  const removeItem = (id: number): void => {
-    const updatedItems = cartItems.filter((item: any) => item.id !== id);
-    setCartItems(updatedItems);
-  };
+  const removeItem = (id: number) => {
+    const param = {
+        cartItemId: id,
+        userId: currentUser.id,  // Đảm bảo currentUser.id có giá trị đúng
+    }
+    console.log(param);
+    dispatch(removeProductFromCart({ param }));  // Truyền param vào như đã định
+};
+  const updateItem = (id: number, quantity: number) => {
+    // Update item in cart
+    const param ={
+      cartItemId: id,
+      quantity: quantity,
+      userId: currentUser.id,
+    }
+    console.log(param);
+    dispatch(updateProductInCart({ param }));
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Giỏ hàng</Text>
-      <FlatList
-        data={carts.cartItems}
-        renderItem={({item}) => (
-          <CartItem cartItem={item} onRemove={removeItem} />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      />
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalText}>
-          Tổng cộng: {carts.total.toLocaleString("vi-VN")} VNĐ
-        </Text>
-      </View>
-      <TouchableOpacity
-        style={styles.checkoutButton}
-        onPress={() => navigation.navigate("Checkout")}
-      >
-        <Text style={styles.checkoutButtonText}>Tiến hành thanh toán</Text>
-      </TouchableOpacity>
+      {cart && (
+        <>
+          <FlatList
+            data={cart?.cartItems}
+            renderItem={({ item }) => (
+              <CartItem cartItem={item} onRemove={removeItem} onUpdate={updateItem} />
+            )}
+            keyExtractor={(item) => item.id.toString()}
+          />
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalText}>
+              Tổng cộng: {cart?.total?.toLocaleString("vi-VN")} VNĐ
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.checkoutButton}
+            onPress={handleCheckout}
+          >
+            <Text style={styles.checkoutButtonText}>Tiến hành thanh toán</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
@@ -70,7 +73,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    paddingTop: 30,
+    paddingTop: 50,
     backgroundColor: "#fff",
   },
   title: {
@@ -113,7 +116,8 @@ const styles = StyleSheet.create({
     borderTopColor: "#ccc",
   },
   totalText: {
-    fontSize: 18,
+    fontSize: 20,
+    color: "red",
     fontWeight: "bold",
   },
   checkoutButton: {
