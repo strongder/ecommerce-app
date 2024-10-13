@@ -19,6 +19,7 @@ import { asyncThunkCreator, current } from "@reduxjs/toolkit";
 import { placeOrder } from "../redux/OrderSlice";
 import axiosInstance from "../api";
 import { fetchCart } from "../redux/CartSlice";
+import { createPayment } from "../redux/PaymentSlice";
 
 const CheckoutScreen = ({ navigation, route }: any) => {
   const { cart } = route.params;
@@ -28,7 +29,6 @@ const CheckoutScreen = ({ navigation, route }: any) => {
   const [subtotal, setSubtotal] = useState<number>(cart.total);
   const [shippingFee, setShippingFee] = useState<number>(30000);
   const dispatch = useDispatch();
-  const [vnpay, setVnpay] = useState<any>({});
   const currentUser = useSelector((state: any) => state.users.currentUser);
 
   const defaultAddress = useSelector(
@@ -42,13 +42,18 @@ const CheckoutScreen = ({ navigation, route }: any) => {
   }, [dispatch]);
 
   const handleCheckout = async () => {
+    if(!defaultAddress){
+      Alert.alert("Thông báo", "Vui lòng chọn địa chỉ giao hàng");
+      return;
+    }
     const data = {
-      userId: currentUser.id,
-      addressId: defaultAddress.id,
+      userId: currentUser?.id,
+      addressId: defaultAddress?.id,
       paymentMethod: paymentMethod,
     };
-    console.log(data);
-    const action = await dispatch(placeOrder({ data, param: { total } }));
+    console.log(defaultAddress);
+    
+    const action = await dispatch(placeOrder({ data, param: {total}  }));
     if (placeOrder.fulfilled.match(action)) {
       const orderId = action.payload.id; // Assuming the orderId is in the payload
       if (paymentMethod === "COD") {
@@ -59,24 +64,19 @@ const CheckoutScreen = ({ navigation, route }: any) => {
     }
     dispatch(fetchCart(currentUser.id));
   };
-  const handleCreatePayment = async (orderId: number) => {
-    try {
-      const response = await axiosInstance.post("/payment/vn-pay", {
-        orderId: orderId,
-        returnUrl: "https://youtube.com",
-      });
-      setVnpay(response.data.result);
-      console.log("Create payment success:", response.data.result);
-      return response.data.result;
-    } catch (error) {
-      console.log("Create payment fail:", error);
+
+  const handleVnpayPayment: any = async (orderId: number) => {
+    // Tạo dữ liệu thanh toán với orderId
+    const data = {
+      orderId: orderId,
+      redirectUrl: "", // Bạn có thể thêm URL để điều hướng sau khi thanh toán hoàn tất
+    };
+    const payment = await dispatch(createPayment(data)).unwrap();
+    if (payment && payment.paymentUrl) {
+      navigation.navigate("VnpayPayment", { paymentUrl: payment.paymentUrl });
     }
   };
 
-  const handleVnpayPayment: any = async (orderId: number) => {
-    const payment = await handleCreatePayment(orderId);
-    navigation.navigate("VnpayPayment", {paymentUrl: payment.paymentUrl} );
-  };
   const handleSelectAddress = () => {
     navigation.navigate("Address");
   };

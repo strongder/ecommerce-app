@@ -10,30 +10,38 @@ import axiosInstance, { configAxios } from "../api";
 import useSocket from "../hook/useSocket";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchNotifications } from "../redux/NotiffiSlice";
+import { fetchNotifications, readNotification } from "../redux/NotiffiSlice";
+import NotifyItem from "../components/NotifyItem";
+import { useNavigation } from "@react-navigation/native";
+import { fetchCurrentUser } from "../redux/UserSlice";
 
-const NotificationScreen = ({ navigation, notifications }: any) => {
-  // const [notifications, setNotifications] = React.useState([]);
+const NotificationScreen = ({ notifications, setUnreadCount }: any) => {
+  const navigation: any = useNavigation();
   const dispatch = useDispatch();
-
-  const handleNotificationPress = (type: any) => {
-    // Navigate to the respective screen based on notification type
-    navigation.navigate(type === "order" ? "OrderDetail" : "PromotionDetail");
+  useEffect(() => {
+    configAxios(navigation);
+    dispatch(fetchCurrentUser());
+  }, [dispatch]);
+  const handleReadNotification = async (item: any) => {
+    if (item.type === "ORDER") {
+      dispatch(readNotification(item.id));
+      navigation.navigate("OrderDetail", { orderId: item.data });
+    }
+    setUnreadCount();
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Thông báo</Text>
       {notifications && (
         <FlatList
           data={notifications}
           keyExtractor={(item: any) => item?.id}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleNotificationPress(item.type)}
+              onPress={() => handleReadNotification(item)}
               style={styles.notificationItem}
             >
-              <Text style={styles.notificationText}>{item.message}</Text>
+              <NotifyItem notifyItem={item} />
             </TouchableOpacity>
           )}
         />
@@ -45,9 +53,9 @@ const NotificationScreen = ({ navigation, notifications }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    paddingTop: 50,
-    backgroundColor: "#fff",
+    padding: 10,
+    paddingTop: 0,
+    backgroundColor: "#f7f7f7",
   },
   title: {
     fontSize: 24,

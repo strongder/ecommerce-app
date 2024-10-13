@@ -15,33 +15,50 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import ProductItem from "../components/ProductItem";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategory, fetchCategoryById } from "../redux/CategorySlice";
-import { fetchProduct, fetchProductByCategory } from "../redux/ProductSlice";
+import { fetchCategory, fetchParentCategoryById, fetchParentCategory } from "../redux/CategorySlice";
+import {
+  fetchProduct,
+  fetchProductByCategory,
+  fetchProductByDiscount,
+} from "../redux/ProductSlice";
 
 const HomeScreen = () => {
   const navigation: any = useNavigation();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const dispatch = useDispatch();
-  const { categories } = useSelector((state: any) => state.categories);
-  const { listProduct } = useSelector((state: any) => state.products);
+  const [pageProductDiscount, setpageProductDiscount] = useState(0);
+  const [pageProduct, setpageProduct] = useState(0);
+  const { parentCategories } = useSelector((state: any) => state.categories);
+  const param = {
+    pageNum: 0,
+  };
+  const { listProduct, listDiscountProduct } = useSelector(
+    (state: any) => state.products
+  );
+
   useEffect(() => {
-    dispatch(fetchCategory());
+    const newParam = { ...param, pageNum: pageProduct };
+    dispatch(fetchProduct({ param: newParam }));
+  }, [dispatch, pageProduct]);
+
+  useEffect(() => {
+    dispatch(fetchParentCategory());
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchProduct());
-  }, [dispatch]);
+    const newParam = { ...param, pageNum: pageProductDiscount };
+    dispatch(fetchProductByDiscount({ param: newParam }));
+  }, [dispatch, pageProductDiscount]);
+
   const handleSearch = () => {
-    console.log(searchTerm);
-    navigation.navigate("SearchPage", { key: searchTerm });
+    navigation.navigate("SearchPage", {searchTerm});
   };
 
   const handleSelectCategory = async (id: number) => {
-     await dispatch(fetchCategoryById(id));
-     await dispatch(fetchProductByCategory(id));
-     navigation.navigate("Category");
+    await dispatch(fetchParentCategoryById(id));
+    navigation.navigate("Category");
   };
-  const renderProductList = (title: string, data: any) => (
+  const renderProductList = (title: string, data: any, setPage: any) => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <FlatList
@@ -50,17 +67,20 @@ const HomeScreen = () => {
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
-              navigation.navigate("ProductDetail", {productId: item.id})
+              navigation.navigate("ProductDetail", { productId: item.id })
             }
             style={styles.productItem}
           >
             <ProductItem product={item} />
           </Pressable>
         )}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id + ""}
         showsHorizontalScrollIndicator={false}
         numColumns={2}
       />
+      <Pressable onPress={() => setPage((prev: any) => prev + 1)}>
+        <Text>Xem thêm</Text>
+      </Pressable>
     </View>
   );
 
@@ -107,11 +127,11 @@ const HomeScreen = () => {
               <AntDesign name="right" size={18} color="black" />
             </Text>
           </View>
-          {categories && (
+          {parentCategories && (
             <FlatList
               horizontal
               scrollEnabled={true}
-              data={categories}
+              data={parentCategories}
               renderItem={({ item }) => (
                 <Pressable
                   style={styles.categoryItem}
@@ -126,12 +146,19 @@ const HomeScreen = () => {
                   </View>
                 </Pressable>
               )}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item) => item.id + ""}
               showsHorizontalScrollIndicator={true}
             />
           )}
         </View>
-        {listProduct && renderProductList("Featured Products", listProduct)}
+        {listDiscountProduct &&
+          renderProductList(
+            "Sản phẩm giảm giá",
+            listDiscountProduct,
+            setpageProductDiscount
+          )}
+        {listProduct &&
+          renderProductList("Sản phẩm", listProduct, setpageProduct)}
       </ScrollView>
     </SafeAreaView>
   );
@@ -143,7 +170,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
-    backgroundColor: "white",
+    backgroundColor: "#f7f7f7",
   },
   listProduct: {},
   productItem: {

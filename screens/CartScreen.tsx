@@ -11,6 +11,8 @@ import CartItem from "../components/CartItem";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 import { removeProductFromCart, updateProductInCart } from "../redux/CartSlice";
+import { fetchCurrentUser } from "../redux/UserSlice";
+import { configAxios } from "../api";
 
 const CartScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
@@ -18,8 +20,11 @@ const CartScreen = ({ navigation }: any) => {
   const currentUser: any = useSelector(
     (state: RootState) => state.users.currentUser
   );
+  useEffect(() => {
+    configAxios(navigation);
+    dispatch(fetchCurrentUser())
+  }, [ dispatch]);
   const handleCheckout = () => {
-    console.log("dsafsd",cart);
     navigation.navigate("Checkout", {cart : cart});
   };
   const removeItem = (id: number) => {
@@ -43,7 +48,6 @@ const CartScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Giỏ hàng</Text>
       {cart && (
         <>
           <FlatList
@@ -72,9 +76,8 @@ const CartScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    paddingTop: 50,
-    backgroundColor: "#fff",
+    padding: 10,
+    backgroundColor: "#f7f7f7",
   },
   title: {
     fontSize: 24,

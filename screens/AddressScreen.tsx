@@ -14,6 +14,7 @@ import {
   fetchAddressByUser,
   deleteAddress,
   updateDefaultAddress,
+  addAddress,
 } from "../redux/AddressSlice";
 import AddressItem from "../components/AddressItem";
 
@@ -85,30 +86,35 @@ const AddressScreen = () => {
 
   return (
     <View style={styles.container}>
-      {listAddress.length > 0 ? (
-        <FlatList
-          data={listAddress}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderAddressItem}
-        />
-      ) : (
-        <Text style={styles.emptyMessage}>Chưa có địa chỉ nào.</Text>
-      )}
-      <TouchableOpacity>
-        <Button
-          title="Thêm địa chỉ"
+      <View>
+        {listAddress.length > 0 ? (
+          <FlatList
+            data={listAddress}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderAddressItem}
+          />
+        ) : (
+          <Text style={styles.emptyMessage}>Chưa có địa chỉ nào.</Text>
+        )}
+      </View>
+      <View>
+        <TouchableOpacity
+          style={styles.addAddress}
           onPress={() => navigation.navigate("AddAddress")}
-          color="#007BFF"
-        />
-      </TouchableOpacity>
+        >
+          <Text style={styles.addAddressText}>Thêm địa chỉ</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 16,
+    flex:1,
+    flexDirection: "column",
+    justifyContent: "space-between",
     backgroundColor: "#F8F9FA",
   },
   addressItem: {
@@ -156,6 +162,17 @@ const styles = StyleSheet.create({
   checkmark: {
     color: "green",
     fontSize: 20,
+  },
+  addAddress: {
+    backgroundColor: "#007BFF",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  addAddressText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

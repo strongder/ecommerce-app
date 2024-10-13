@@ -12,72 +12,58 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchOrderByUser } from "../redux/OrderSlice";
 
 const OrderHistoryScreen = ({ navigation }: any) => {
-  const [selectedStatus, setSelectedStatus] = useState("ALL");
+  const [selectedStatus, setSelectedStatus] = useState("PENDING");
   const dispatch = useDispatch();
-  const orders = useSelector((state: any) => state.orders.listOrderByUser) || []; // Ensure it's an array
+  const orders = useSelector((state: any) => state.orders.listOrderByUser);
   const currentUser = useSelector((state: any) => state.users.currentUser);
 
+  // Fetch orders by user
   useEffect(() => {
-    if (currentUser?.id) {
-      
+    console.log(currentUser.id);
+    if (currentUser.id) {
       dispatch(fetchOrderByUser(currentUser.id));
     }
   }, [dispatch, currentUser]);
 
-  const filteredOrders =
-    selectedStatus === "ALL"
-      ? orders.filter((order: any) => order) // Filter out undefined items
-      : orders.filter((order: any) => order?.status === selectedStatus);
+  // Filter orders based on the selected status
+  const filteredOrders = orders?.filter((order: any) => order?.status === selectedStatus) || [];
 
   return (
     <View style={styles.container}>
-      <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-        <View style={styles.topbar}>
-          {[
-            "ALL",
-            "PENDING",
-            "PENDING PAYMENT",
-            "PROCESSING",
-            "COMPLETED",
-            "CANCELLED",
-            "PAID",
-          ].map((status) => (
-            <TouchableOpacity
-              key={status}
-              onPress={() => setSelectedStatus(status)}
-              style={styles.topbarItem}
+      {/* Filter Status Bar */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={styles.topbar}>
+        {["PENDING", "PENDING_PAYMENT", "PROCESSING", "COMPLETED", "CANCELLED"].map((status) => (
+          <TouchableOpacity
+            key={status}
+            onPress={() => setSelectedStatus(status)}
+            style={styles.topbarItem}
+          >
+            <Text
+              style={selectedStatus === status ? styles.activeText : styles.inactiveText}
             >
-              <Text
-                style={
-                  selectedStatus === status
-                    ? styles.activeText
-                    : styles.inactiveText
-                }
-              >
-                {status}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+              {status}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       </ScrollView>
 
-      {filteredOrders.length > 0 && (
+      {/* Order List */}
+      {filteredOrders.length > 0 ? (
         <FlatList
           data={filteredOrders}
-          renderItem={({ item }) => {
-            if (!item || !item.id) return null; // Check if item is valid
-            return (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("OrderDetail", { orderId: item.id })
-                }
-              >
-                <OrderItem item={item} />
-              </TouchableOpacity>
-            );
-          }}
-          keyExtractor={(item) => (item && item.id ? item.id.toString() : Math.random().toString())} // Fallback key
+          renderItem={({ item }: any) => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("OrderDetail", { orderId: item.id })}
+            >
+              <OrderItem item={item} />
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item: any) => item.id.toString()}
         />
+      ) : (
+        <Text style={styles.noOrdersText}>No orders found for the selected status.</Text>
       )}
     </View>
   );
@@ -87,7 +73,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: "flex-start",
     padding: 16,
-    paddingBottom: 60
+    paddingBottom: 60,
   },
   topbar: {
     flexDirection: "row",
@@ -95,7 +81,7 @@ const styles = StyleSheet.create({
   },
   topbarItem: {
     paddingVertical: 10,
-    paddingHorizontal: 15, // Thêm khoảng cách giữa các nút
+    paddingHorizontal: 15,
   },
   activeText: {
     fontWeight: "bold",
@@ -104,12 +90,11 @@ const styles = StyleSheet.create({
   inactiveText: {
     color: "black",
   },
-  orderItem: {
-    marginBottom: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
+  noOrdersText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: "gray",
+    textAlign: "center",
   },
 });
 

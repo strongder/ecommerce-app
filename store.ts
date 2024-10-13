@@ -8,6 +8,7 @@ import notificationReducer from "./redux/NotiffiSlice";
 import reviewReducer from "./redux/ReviewSlice";
 import orderReducer from "./redux/OrderSlice";
 import addressReducer from "./redux/AddressSlice";
+import paymentReducer from "./redux/PaymentSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistReducer } from "redux-persist";
 import persistStore from "redux-persist/es/persistStore";
@@ -31,6 +32,7 @@ export const store = configureStore({
     notifications: notificationReducer,
     reviews: reviewReducer,
     orders: orderReducer,
+    payments: paymentReducer,
     addresses: addressReducer,
   },
   middleware: (getDefaultMiddleware) =>

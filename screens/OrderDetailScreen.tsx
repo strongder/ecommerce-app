@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,17 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { cancelOrder, fetchOrderById } from "../redux/OrderSlice";
-
+import {
+  cancelOrder,
+  fetchOrderById,
+  updatePaymentMethod,
+} from "../redux/OrderSlice";
+import { createPayment } from "../redux/PaymentSlice";
 const OrderDetailScreen = ({ navigation, route }: any) => {
   const { orderId } = route.params;
   const dispatch = useDispatch();
+  const [isChangingPayment, setIsChangingPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
   const order = useSelector((state: any) => state.orders.order);
 
   useEffect(() => {
@@ -23,8 +29,35 @@ const OrderDetailScreen = ({ navigation, route }: any) => {
     dispatch(cancelOrder(orderId));
   };
 
+  const handlePaymentOrder = async (orderId: number) => {
+    // Tạo dữ liệu thanh toán với orderId
+    const data = {
+      orderId: orderId,
+      redirectUrl: "", // Bạn có thể thêm URL để điều hướng sau khi thanh toán hoàn tất
+    };
+    const payment = await dispatch(createPayment(data)).unwrap();
+    if (payment && payment.paymentUrl) {
+      navigation.navigate("VnpayPayment", { paymentUrl: payment.paymentUrl });
+    }
+  };
+
+  // Thay đổi phương thức thanh toán
+  const handleChangePaymentMethod = async () => {
+    const updatedPaymentData = {
+      orderId,
+      paymentMethod,
+    };
+
+    await dispatch(updatePaymentMethod(updatedPaymentData));
+    setIsChangingPayment(false);
+  };
+
+  console.log(order);
+
   return (
-    <View style={styles.container}>
+    <View
+      style={isChangingPayment ? styles.containerOverlay : styles.container}
+    >
       {order !== null && (
         <>
           <ScrollView style={styles.scrollContainer}>
@@ -72,11 +105,14 @@ const OrderDetailScreen = ({ navigation, route }: any) => {
               </View>
             ))}
           </ScrollView>
-
           <View style={styles.actionsContainer}>
-            {order.status === "PENDING" && (
+            {(order.status === "PENDING" ||
+              order.status === "PENDING_PAYMENT") && (
               <>
-                <TouchableOpacity style={styles.buttonAction}>
+                <TouchableOpacity
+                  style={styles.buttonAction}
+                  onPress={() => setIsChangingPayment(true)}
+                >
                   <Text style={styles.buttonText}>
                     Đổi phương thức thanh toán
                   </Text>
@@ -87,17 +123,52 @@ const OrderDetailScreen = ({ navigation, route }: any) => {
                 >
                   <Text style={styles.buttonText}>Hủy đơn hàng</Text>
                 </TouchableOpacity>
+
               </>
             )}
 
             {order.paymentMethod === "VNPAY" &&
-              order.status === "PENDING PAYMENT" && (
-                <TouchableOpacity style={styles.payment}>
-                  <Text style={styles.buttonText}>Thanh toán ngay</Text>
+              order.status === "PENDING_PAYMENT" && (
+                <TouchableOpacity
+                  style={styles.payment}
+                  onPress={() => handlePaymentOrder(order.id)}
+                >
+                  <Text style={styles.buttonTextPayment}>Thanh toán ngay</Text>
                 </TouchableOpacity>
               )}
           </View>
         </>
+      )}
+      {isChangingPayment && (
+        <View style={styles.changePayment}>
+          <Text style={styles.title}>Đổi phương thức thanh toán</Text>
+
+          <TouchableOpacity
+            style={[
+              styles.buttonAction,
+              paymentMethod === "COD" ? styles.selectedButton : {},
+            ]}
+            onPress={() => setPaymentMethod("COD")}
+          >
+            <Text>Thanh toán khi nhận hàng</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.buttonAction,
+              paymentMethod === "VNPAY" ? styles.selectedButton : {},
+            ]}
+            onPress={() => setPaymentMethod("VNPAY")}
+          >
+            <Text>Thanh toán online (VNPAY)</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.confirmButton}
+            onPress={handleChangePaymentMethod}
+          >
+            <Text style={styles.buttonText}>Xác nhận</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -107,6 +178,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  containerOverlay: {
+    // position: "absolute",
+    // top: 0,
+    // left: 0,
+    // right: 0,
+    // bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Màu nền mờ
+    // zIndex: 1, // Đặt lên trên cùng
   },
   scrollContainer: {
     padding: 16,
@@ -143,31 +223,62 @@ const styles = StyleSheet.create({
   productInfo: {
     flex: 1,
   },
-
-  // Hành động đặt dưới cùng nhưng không cố định vị trí
   actionsContainer: {
     padding: 16,
     backgroundColor: "#f9f9f9",
   },
   buttonAction: {
-    backgroundColor: "#3498db",
     paddingVertical: 10,
     paddingHorizontal: 20,
+    borderColor: "#3498db", // Màu xanh cho viền
+    borderWidth: 2, // Độ dày của viền
     marginBottom: 10,
-    borderRadius: 8,
-    justifyContent: "center",
+    borderRadius: 8, // Bo góc cho nút
+    justifyContent: "space-between",
     alignItems: "center",
+  },
+  selectedButton: {
+    backgroundColor: "#3498db", // Màu nền cho nút được chọn
+    borderColor: "#2980b9", // Màu viền cho nút được chọn
   },
   buttonText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: "black",
+  },
+  buttonTextPayment: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "white",
+  },
+  changePayment: {
+    position: "absolute",
+    backgroundColor: "#fff",
+    margin: "auto",
+    padding: 16,
+    top: "30%", // Đặt vị trí để modal không che khuất
+    left: "10%",
+    right: "10%",
+    borderRadius: 8,
+    elevation: 5, // Thêm độ nổi
+    shadowColor: "#000", // Màu bóng
+    shadowOffset: { width: 0, height: 2 }, // Độ rộng và chiều cao của bóng
+    shadowOpacity: 0.3, // Độ trong suốt của bóng
+    shadowRadius: 4, // Độ mịn của bóng
+  },
+  confirmButton: {
+    backgroundColor: "#3498db",
+    paddingVertical: 10,
+    marginHorizontal: 0,
+    marginTop: 10,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   payment: {
     backgroundColor: "orange",
     paddingVertical: 10,
-    marginHorizontal: 20,
-    marginBottom: 20,
+    marginHorizontal: 0,
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",

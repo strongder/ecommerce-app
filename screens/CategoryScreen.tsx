@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { categories, products } from "../data";
 import ProductItem from "../components/ProductItem";
@@ -15,24 +15,27 @@ import { fetchProductByCategory } from "../redux/ProductSlice";
 
 const CategoryScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
+  const [isActiveId, setIsActiveId] = useState<number>();
   const listProductByCategory = useSelector(
     (state: any) => state.products.listProductByCategory
   );
-  const {category, categories} = useSelector((state: any) => state.categories);
+  const {parentCategory, subCategories} = useSelector((state: any) => state.categories);
+
   const handleFetchProductByCategory = (id: number) => {
+    setIsActiveId(id);
     dispatch(fetchProductByCategory(id));
   };
   return (
     <View style={styles.container}>
       <View style={styles.category}>
-        <Text style={styles.sectionTitle}>Danh mục sản phẩm</Text>
+        <Text style={styles.sectionTitle}>{parentCategory.name}</Text>
         <FlatList
           horizontal
           scrollEnabled={true}
-          data={categories}
+          data={subCategories}
           renderItem={({ item }) => (
             <Pressable
-              style={styles.categoryItem}
+              style={isActiveId === item.id ? styles.categoryItemActive :styles.categoryItem}
               onPress={() =>
                handleFetchProductByCategory(item.id)
               }
@@ -50,7 +53,7 @@ const CategoryScreen = ({ navigation }: any) => {
           showsHorizontalScrollIndicator={true}
         />
       </View>
-      {category && <Text>{category?.name}</Text>}
+      {/* {category && } */}
       {listProductByCategory && (
         <FlatList
           contentContainerStyle={styles.listProduct}
@@ -87,13 +90,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
+    paddingLeft: 10,
     fontWeight: "bold",
     marginBottom: 10,
   },
   categoryItem: {
     padding: 10,
     backgroundColor: "#AFEEEE",
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  categoryItemActive: {
+    padding: 10,
+    backgroundColor: "orange",
     borderRadius: 5,
     marginRight: 10,
   },

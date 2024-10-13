@@ -2,14 +2,24 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
 const ProductItem = ({ product }: any) => {
+  console.log(product.discount);
   return (
     <View style={styles.container}>
-      <Image source={{ uri: product.imageUrls[0].imageUrl }} style={styles.image} />
+      {product.discount > 0 && (
+        <View style={styles.discount}>
+          <Text style={styles.textDiscount}>{product.discount}%</Text>
+        </View>
+      )}
+
+      <Image
+        source={{ uri: product.imageUrls[0].imageUrl }}
+        style={styles.image}
+      />
       <View style={styles.info}>
         <Text style={styles.name}>{product.name}</Text>
         <Text style={styles.price}>{product.price} VNĐ</Text>
         <Text style={styles.sold}>Đã bán: {product.quantitySold}</Text>
-        <Text style={styles.rating}>Đánh giá: {product.rating} ⭐</Text>
+        <Text style={styles.rating}>Đánh gia: {product.rating} ⭐</Text>
       </View>
     </View>
   );
@@ -26,6 +36,22 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 16,
     backgroundColor: "#fff",
+  },
+  discount: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "red",
+    padding: 4,
+    zIndex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 4,
+  },
+  textDiscount: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "bold",
   },
   image: {
     width: "100%",

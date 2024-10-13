@@ -33,7 +33,6 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const product = useSelector((state: any) => state.products.product);
-
   // Kiểm tra nếu product hoặc product.varProducts là undefined
   const classifications =
     product?.varProducts &&
@@ -47,6 +46,11 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
         label: classificationString,
       };
     });
+  useEffect(() => {
+    if (classifications && classifications.length > 0) {
+      setSelectedClassification(classifications[0].id);
+    }
+  }, [classifications]);
 
   useEffect(() => {
     configAxios(navigation);

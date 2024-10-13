@@ -12,8 +12,20 @@ export const fetchCategory: any = createAsyncThunk(
     }
   }
 );
-export const fetchCategoryById: any = createAsyncThunk(
-  "categories/fetchCategoryById",
+
+export const fetchParentCategory: any = createAsyncThunk(
+  "categories/fetchParentCategory",
+  async () => {
+    try {
+      const response = await axiosInstance.get(`/public/categories/parent`);
+      return response.data.result;
+    } catch (error) {
+      console.log("Get category fail:", error);
+    }
+  }
+);
+export const fetchParentCategoryById: any = createAsyncThunk(
+  "categories/fetchParentCategoryById",
   async (categoryId: number) => {
     try {
       const response = await axiosInstance.get(
@@ -25,10 +37,26 @@ export const fetchCategoryById: any = createAsyncThunk(
     }
   }
 );
+// export const fetchCategoryById: any = createAsyncThunk(
+//   "categories/fetchChildCategoryById",
+//   async (categoryId: number) => {
+//     try {
+//       const response = await axiosInstance.get(
+//         `/public/categories/${categoryId}`
+//       );
+//       return response.data.result;
+//     } catch (error) {
+//       console.log("Get category fail:", error);
+//     }
+//   }
+// );
 
 const initialState = {
   categories: [],
-  category: {},
+  parentCategories: [],
+  subCategories: [],
+  subCategor:{},
+  parentCategory: {},
   loading: "idle",
 };
 
@@ -42,8 +70,13 @@ const categorySlice = createSlice({
         state.categories = action.payload;
         state.loading = "succeeded";
       })
-      .addCase(fetchCategoryById.fulfilled, (state, action) => {
-        state.category = action.payload;
+      .addCase(fetchParentCategoryById.fulfilled, (state, action) => {
+        state.parentCategory = action.payload;
+        state.subCategories = action.payload.subCategories;
+        state.loading = "succeeded";
+      })
+      .addCase(fetchParentCategory.fulfilled, (state, action) => {
+        state.parentCategories = action.payload;
         state.loading = "succeeded";
       });
   },

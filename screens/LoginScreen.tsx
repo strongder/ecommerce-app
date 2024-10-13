@@ -10,7 +10,11 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import { NavigationProp, ParamListBase, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/AuthSlice";
@@ -20,7 +24,6 @@ import { RootState } from "../store";
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [token, setToken] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>("");
   const navigation: NavigationProp<ParamListBase> = useNavigation();
   const [isLogin, setIsLogin] = useState(false);
@@ -30,36 +33,22 @@ const LoginScreen = () => {
   );
 
   useEffect(() => {
-    const getToken = async () => {
-      const storedToken = await AsyncStorage.getItem("token");
-      if (storedToken) {
-        setToken(storedToken);
-      }
-    };
-    getToken();
-  }, []);
-
-  useEffect( () => {
-    if (isLogin && token) {
+    if (isLogin) {
       dispatch(fetchCurrentUser());
       navigation.goBack();
     }
-  }, [isLogin, token]);
+  }, [isLogin]);
 
   const handleLogin = async () => {
     if (!email || !password) {
       setErrorMessage("Email và mật khẩu không được bỏ trống.");
       return;
     }
-    
     try {
       const action = await dispatch(login({ email, password }));
-      if (login.fulfilled.match(action)) {
-        const storedToken = await AsyncStorage.getItem("token");
-        if (storedToken) {
-          setToken(storedToken);
-          setIsLogin(true);
-        }
+      const storedToken = await AsyncStorage.getItem("token");
+      if (storedToken) {
+        setIsLogin(true);
       } else {
         setErrorMessage("Đăng nhập thất bại, vui lòng thử lại.");
       }
@@ -69,30 +58,31 @@ const LoginScreen = () => {
     }
   };
 
-
   return (
     <SafeAreaView style={styles.container}>
-      <View>
+      <View style={styles.logo}>
         <Image
-          style={styles.logo}
-          source={{
-            uri: "https://assets.stickpng.com/thumbs/6160562276000b00045a7d97.png",
-          }}
+          style={styles.imageLogo}
+          source={require("../assets/logo-ecommerce.png")}
         />
       </View>
 
-      <KeyboardAvoidingView behavior="padding" style={styles.keyboardAvoidingView}>
-        <View style={styles.centered}>
-          <Text style={styles.headerText}>Đăng nhập vào tài khoản của bạn</Text>
-        </View>
-
+      <KeyboardAvoidingView
+        behavior="padding"
+        style={styles.keyboardAvoidingView}
+      >
         {errorMessage ? (
           <Text style={styles.errorText}>{errorMessage}</Text>
         ) : null}
 
         <View style={styles.inputWrapper}>
           <View style={styles.inputContainer}>
-            <MaterialIcons style={styles.icon} name="email" size={24} color="gray" />
+            <MaterialIcons
+              style={styles.icon}
+              name="email"
+              size={24}
+              color="gray"
+            />
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -106,7 +96,12 @@ const LoginScreen = () => {
 
         <View style={styles.inputWrapper}>
           <View style={styles.inputContainer}>
-            <AntDesign name="lock1" size={24} color="gray" style={styles.icon} />
+            <AntDesign
+              name="lock1"
+              size={24}
+              color="gray"
+              style={styles.icon}
+            />
             <TextInput
               value={password}
               onChangeText={setPassword}
@@ -118,7 +113,6 @@ const LoginScreen = () => {
         </View>
 
         <View style={styles.footer}>
-          <Text>Giữ trạng thái đăng nhập</Text>
           <Text style={styles.forgotPassword}>Quên mật khẩu</Text>
         </View>
 
@@ -137,8 +131,6 @@ const LoginScreen = () => {
   );
 };
 
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -147,8 +139,13 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   logo: {
-    width: 150,
+    marginTop: 50,
+    width: 300,
     height: 100,
+  },
+  imageLogo: {
+    width: "100%",
+    height: "100%",
   },
   keyboardAvoidingView: {
     flex: 1,

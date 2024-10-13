@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Button, Alert, TextInput } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import axios from "axios";
 import { Picker } from "@react-native-picker/picker";
 import { useDispatch, useSelector } from "react-redux";
 import { addAddress } from "../redux/AddressSlice";
 import { useNavigation } from "@react-navigation/native";
+import * as Location from "expo-location";
 
 const AddAddressScreen: React.FC = () => {
   const [provinces, setProvinces] = useState([]);
@@ -13,6 +22,9 @@ const AddAddressScreen: React.FC = () => {
   const [selectCity, setSelectCity] = useState(""); // Lưu ID tỉnh
   const [selectDistrict, setSelectDistrict] = useState(""); // Lưu ID quận
   const [selectWard, setSelectWard] = useState(""); // Lưu ID xã
+  const [isCurrentAddress, setIsCurrentAddress] = useState(false);
+  const [location, setLocation] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<any>(null);
 
   const currentUser = useSelector((state: any) => state.users.currentUser);
   const [form, setForm] = useState({
@@ -116,10 +128,7 @@ const AddAddressScreen: React.FC = () => {
     if (
       !addressDetail ||
       !phone ||
-      !recipientName ||
-      !selectCity ||
-      !selectDistrict ||
-      !selectWard
+      !recipientName 
     ) {
       Alert.alert("Thông báo", "Bạn cần nhập đầy đủ thông tin.");
       return;
@@ -134,78 +143,146 @@ const AddAddressScreen: React.FC = () => {
       (district: any) => district.id === selectDistrict
     );
     const wardName: any = wards.find((ward: any) => ward.id === selectWard);
-    Alert.alert("Thông báo","Thêm địa chỉ thành công.");
+    Alert.alert("Thông báo", "Thêm địa chỉ thành công.");
     navigation.goBack();
+  };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location.coords);
+    })();
+  }, []);
+
+  const fetchAddressCurrent = async ({ latitude, longitude }: any) => {
+    try {
+      setIsCurrentAddress(true);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+      );
+      const data = await response.json();
+      if (data) {
+        console.log(data);
+        setForm({
+          ...form,
+          city: data.address.city,
+          district: data.address?.suburb || data.address?.city_district, // Quận/ huyen
+          ward: data.address?.quarter || data.address?.village,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Nhập tên người nhận"
-        value={form.recipientName}
-        onChangeText={(text) => setForm({ ...form, recipientName: text })}
-      />
+      <View>
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập tên người nhận"
+          value={form.recipientName}
+          onChangeText={(text) => setForm({ ...form, recipientName: text })}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nhập số điện thoại"
-        value={form.phone}
-        onChangeText={(text) => setForm({ ...form, phone: text })}
-        keyboardType="phone-pad"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập số điện thoại"
+          value={form.phone}
+          onChangeText={(text) => setForm({ ...form, phone: text })}
+          keyboardType="phone-pad"
+        />
+        {!isCurrentAddress ? (
+          <>
+            <Picker
+              selectedValue={selectCity}
+              style={styles.picker}
+              onValueChange={handleProvinceChange}
+            >
+              <Picker.Item label="Chọn Tỉnh Thành" value="" />
+              {provinces.map((province: any) => (
+                <Picker.Item
+                  key={province.id}
+                  label={province.full_name}
+                  value={province.id}
+                />
+              ))}
+            </Picker>
 
-      <Picker
-        selectedValue={selectCity}
-        style={styles.picker}
-        onValueChange={handleProvinceChange}
-      >
-        <Picker.Item label="Chọn Tỉnh Thành" value="" />
-        {provinces.map((province: any) => (
-          <Picker.Item
-            key={province.id}
-            label={province.full_name}
-            value={province.id}
-          />
-        ))}
-      </Picker>
+            <Picker
+              selectedValue={selectDistrict}
+              style={styles.picker}
+              onValueChange={handleDistrictChange}
+              enabled={selectCity !== ""}
+            >
+              <Picker.Item label="Chọn Quận Huyện" value="" />
+              {districts.map((district: any) => (
+                <Picker.Item
+                  key={district.id}
+                  label={district.full_name}
+                  value={district.id}
+                />
+              ))}
+            </Picker>
 
-      <Picker
-        selectedValue={selectDistrict}
-        style={styles.picker}
-        onValueChange={handleDistrictChange}
-        enabled={selectCity !== ""}
-      >
-        <Picker.Item label="Chọn Quận Huyện" value="" />
-        {districts.map((district: any) => (
-          <Picker.Item
-            key={district.id}
-            label={district.full_name}
-            value={district.id}
-          />
-        ))}
-      </Picker>
-
-      <Picker
-        selectedValue={selectWard}
-        style={styles.picker}
-        onValueChange={handleWardChange}
-        enabled={selectDistrict !== ""}
-      >
-        <Picker.Item label="Chọn Phường Xã" value="" />
-        {wards.map((ward: any) => (
-          <Picker.Item key={ward.id} label={ward.full_name} value={ward.id} />
-        ))}
-      </Picker>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nhập địa chỉ chi tiết"
-        value={form.addressDetail}
-        onChangeText={(text) => setForm({ ...form, addressDetail: text })}
-      />
-
-      <Button title="Lưu Địa Chỉ" onPress={handleSaveAddress} />
+            <Picker
+              selectedValue={selectWard}
+              style={styles.picker}
+              onValueChange={handleWardChange}
+              enabled={selectDistrict !== ""}
+            >
+              <Picker.Item label="Chọn Phường Xã" value="" />
+              {wards.map((ward: any) => (
+                <Picker.Item
+                  key={ward.id}
+                  label={ward.full_name}
+                  value={ward.id}
+                />
+              ))}
+            </Picker>
+          </>
+        ) : (
+          <>
+            <TextInput
+              style={styles.input}
+              value={form.city}
+              onChangeText={(text) => setForm({ ...form, city: text })}
+            />
+            <TextInput
+              style={styles.input}
+              value={form.district}
+              onChangeText={(text) => setForm({ ...form, district: text })}
+            />
+            <TextInput
+              style={styles.input}
+              value={form.ward}
+              onChangeText={(text) => setForm({ ...form, ward: text })}
+            />
+          </>
+        )}
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập địa chỉ chi tiết"
+          value={form.addressDetail}
+          onChangeText={(text) => setForm({ ...form, addressDetail: text })}
+        />
+      </View>
+      <View style={{ gap: 10 }}>
+        <TouchableOpacity
+          style={styles.location}
+          onPress={() => fetchAddressCurrent(location)}
+        >
+          <Text style={styles.btnText}>Lấy vị trí hiện tại</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.btnAction} onPress={handleSaveAddress}>
+          <Text style={styles.btnText}>Lưu địa chỉ</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -213,6 +290,7 @@ const AddAddressScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "space-between",
     padding: 15,
   },
   input: {
@@ -231,6 +309,19 @@ const styles = StyleSheet.create({
     borderColor: "#686868",
     borderRadius: 5,
   },
+  btnAction: {
+    backgroundColor: "#FF6347",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  location: {
+    backgroundColor: "#2976d0",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  btnText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
 });
 
 export default AddAddressScreen;

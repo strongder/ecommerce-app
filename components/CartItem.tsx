@@ -20,7 +20,6 @@ interface CartItemProps {
 }
 const CartItem: React.FC<CartItemProps> = ({ cartItem, onRemove, onUpdate }) => {
   const [quantity, setQuantity] = useState<number>(cartItem.quantity);
-  console.log("checi-----",cartItem);
 
   const increaseQuantity = () => {
     setQuantity(quantity + 1);
