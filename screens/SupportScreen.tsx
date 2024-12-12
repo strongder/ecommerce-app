@@ -15,31 +15,19 @@ const SupportScreen = () => {
   const [location, setLocation] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<any>(null);
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location.coords);
-    })();
-  }, []);
 
   // Địa chỉ và vị trí cửa hàng
   const storeInfo = {
-    name: "Cửa Hàng ABC",
-    address: "123 Đường XYZ, Quận 1, TP.HCM",
+    name: "Clothes Store", // Tên cửa hàng
+    address: "Sn 20, Ngõ 195, Đường Quang Trung, Quận Hà Đông , Hà Nội", // Địa chỉ cửa hàng
     phone: "0123 456 789",
-    latitude: 10.762622, // Thay thế bằng vĩ độ của cửa hàng
-    longitude: 106.660172, // Thay thế bằng kinh độ của cửa hàng
+    latitude: 20.968688,
+    longitude: 105.773500, 
   };
 
   // Hàm mở Google Maps chỉ đường đến cửa hàng
   const openMaps = () => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${storeInfo.latitude},${storeInfo.longitude}`;
     Linking.openURL(url);
   };
 
@@ -62,7 +50,7 @@ const SupportScreen = () => {
       </View>
 
       <View style={styles.mapContainer}>
-        <Text style={styles.title}>Bản đồ</Text>
+        <Text style={styles.title}>Địa chỉ</Text>
         {errorMsg ? (
           <Text>{errorMsg}</Text>
         ) : (

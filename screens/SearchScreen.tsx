@@ -125,6 +125,8 @@ const SearchScreen = ({ navigation, route }: any) => {
           <Picker.Item label="Giá < 50.000" value={50000} />
           <Picker.Item label="Giá < 100.000" value={100000} />
           <Picker.Item label="Giá < 200.000" value={200000} />
+          <Picker.Item label="Giá < 500.000" value={500000} />
+          <Picker.Item label="Giá < 500.000" value={1000000} />
         </Picker>
 
         <Picker

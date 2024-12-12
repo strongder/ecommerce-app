@@ -22,7 +22,7 @@ const NotificationScreen = ({ notifications, setUnreadCount }: any) => {
     configAxios(navigation);
     dispatch(fetchCurrentUser());
   }, [dispatch]);
-  const handleReadNotification = async (item: any) => {
+   const handleReadNotification = async (item: any) => {
     if (item.type === "ORDER") {
       dispatch(readNotification(item.id));
       navigation.navigate("OrderDetail", { orderId: item.data });

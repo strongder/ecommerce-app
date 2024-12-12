@@ -74,7 +74,10 @@ const styles = StyleSheet.create({
   },
   unreadText: {
     color: "red",
-    fontSize: 20, // Điều chỉnh kích thước để phù hợp
+    position: "absolute",
+    right: -10,
+    top: -36,
+    fontSize: 50, // Điều chỉnh kích thước để phù hợp
     fontWeight: "bold", // Dấu "." đậm hơn để nổi bật
   },
 });

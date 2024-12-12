@@ -47,7 +47,7 @@ const OrderItem = ({ item }: any) => {
         )}
       />
       <Text style={styles.totalPrice}>Tổng giá: {item?.total} VNĐ</Text>
-      {item.status === "PROCESSING" && (
+      {item.status === "SHIPED" && (
         <Pressable style={styles.buttonAction} onPress={handleCompleteOrder}>
           <Text style={styles.text}>Đã nhận hàng</Text>
         </Pressable>

@@ -88,7 +88,8 @@ const productSlice = createSlice({
         state.loading = "succeeded";
       })
       .addCase(fetchProduct.fulfilled, (state, action) => {
-        state.listProduct = [...state.listProduct, ...action.payload];
+        // state.listProduct = [...state.listProduct, ...action.payload];
+        state.listProduct = action.payload;
         state.loading = "succeeded";
       })
       .addCase(fetchProductByCategory.fulfilled, (state, action) => {
@@ -101,7 +102,8 @@ const productSlice = createSlice({
         state.loading = "succeeded";
       })
       .addCase(fetchProductByDiscount.fulfilled, (state, action) => {
-        state.listDiscountProduct = [...state.listDiscountProduct, ...action.payload];
+        // state.listDiscountProduct = [...state.listDiscountProduct, ...action.payload];
+        state.listDiscountProduct = action.payload;
         state.loading = "succeeded";
       });
   },

@@ -27,7 +27,7 @@ const CheckoutScreen = ({ navigation, route }: any) => {
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [total, setTotal] = useState<number>(0);
   const [subtotal, setSubtotal] = useState<number>(cart.total);
-  const [shippingFee, setShippingFee] = useState<number>(30000);
+  const [shippingFee, setShippingFee] = useState<number>(0);
   const dispatch = useDispatch();
   const currentUser = useSelector((state: any) => state.users.currentUser);
 

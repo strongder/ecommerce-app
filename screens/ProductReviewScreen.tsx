@@ -13,15 +13,22 @@ import {
   createReview,
   fetchReviewByUserAndProduct,
 } from "../redux/ReviewSlice";
+import { useNavigation } from "@react-navigation/native";
 
 const ProductReviewScreen = ({ route }: any) => {
   const { orderItem } = route.params;
   const currentUser = useSelector((state: any) => state.users.currentUser);
   const { review } = useSelector((state: any) => state.reviews);
+  const navigation: any = useNavigation();
 
   const [type, setType] = useState("create");
   const dispatch = useDispatch();
-  const [reviewData, setReviewData] = useState<any>({})
+  const [reviewData, setReviewData] = useState<any>({
+    productId: orderItem.varProduct.productId,
+    rating: 0,
+    comment: "",
+    userId: currentUser.id,
+  });
   // Lấy review nếu đã có
   useEffect(() => {
     if (currentUser?.id && orderItem?.varProduct?.productId) {
@@ -49,12 +56,15 @@ const ProductReviewScreen = ({ route }: any) => {
 
   // Hàm cập nhật số sao được chọn
   const handleRating = (star: number) => {
+    
     setReviewData({ ...reviewData, rating: star });
   };
 
   // Hàm xử lý gửi đánh giá
   const handleSubmit = () => {
+    console.log(reviewData);
     dispatch(createReview(reviewData));
+    navigation.navigate("ProductDetail", { productId: orderItem.varProduct.productId });
   };
 
   return (

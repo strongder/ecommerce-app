@@ -35,6 +35,15 @@ const HomeScreen = () => {
   const { listProduct, listDiscountProduct } = useSelector(
     (state: any) => state.products
   );
+  const [data, setData] = useState<any>([]);
+  const [dataDiscount, setDataDiscount] = useState<any>([]);
+
+  useEffect(() => {
+    setData((prev: any) => [...prev, ...listProduct]);
+  }, [listProduct]);
+  useEffect(() => {
+    setDataDiscount((prev: any) => [...prev, ...listDiscountProduct]);
+  }, [listDiscountProduct]);
 
   useEffect(() => {
     const newParam = { ...param, pageNum: pageProduct };
@@ -154,11 +163,11 @@ const HomeScreen = () => {
         {listDiscountProduct &&
           renderProductList(
             "Sản phẩm giảm giá",
-            listDiscountProduct,
+            dataDiscount,
             setpageProductDiscount
           )}
         {listProduct &&
-          renderProductList("Sản phẩm", listProduct, setpageProduct)}
+          renderProductList("Sản phẩm", data, setpageProduct)}
       </ScrollView>
     </SafeAreaView>
   );

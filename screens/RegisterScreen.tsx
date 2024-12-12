@@ -1,191 +1,190 @@
-import { Image, KeyboardAvoidingView, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native'
-import React, { useState } from 'react'
-import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons'
-import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Alert,
+} from "react-native";
+import React, { useState } from "react";
+import { AntDesign, MaterialIcons, Feather} from "@expo/vector-icons";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from "@react-navigation/native";
+import axiosInstance from "../api";
 
 const RegisterScreen = () => {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [name, setName] = useState("");
-    const navigation: NavigationProp<ParamListBase>= useNavigation();
+  const handleRegister = async () => {
+    if (!phone || !email || !password) {
+      Alert.alert("Error", "All fields are required");
+      return;
+    }
+    try {
+      const response = await axiosInstance.post('/auth/register', {
+        email,
+        username,
+        password,
+        phone,
+      });
+
+      if (response.status === 201) {
+        Alert.alert("Success", "Registration completed successfully!");
+        navigation.navigate("Login");
+      } else {
+        Alert.alert("Error", response.data.message || "Registration failed");
+      }
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Something went wrong, please try again later."
+      );
+    }
+  };
+
   return (
-    <SafeAreaView
-    style={{ flex: 1, backgroundColor: "white", alignItems: "center",marginTop:50  }}
-  >
-    <View>
-      <Image
-        style={{ width: 150, height: 100 }}
-        source={{
-          uri: "https://assets.stickpng.com/thumbs/6160562276000b00045a7d97.png",
-        }}
-      />
-    </View>
-
-    <KeyboardAvoidingView>
-      <View style={{ alignItems: "center" }}>
-        <Text
-          style={{
-            fontSize: 17,
-            fontWeight: "bold",
-            marginTop: 12,
-            color: "#041E42",
-          }}
-        >
-          Register to your Account
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.logo}>
+        <Image
+          style={styles.imageLogo}
+          source={require("../assets/logo-ecommerce.png")}
+        />
       </View>
 
-      <View style={{ marginTop: 70 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-            backgroundColor: "#D0D0D0",
-            paddingVertical: 5,
-            borderRadius: 5,
-            marginTop: 30,
-          }}
-        >
-          {/* <Ionicons
-            size={24}
-            name="ios-person"
-            color="gray"
-            style={{ marginLeft: 8 }}
-          /> */}
+      <KeyboardAvoidingView style={styles.formContainer}>
+        <Text style={styles.headerText}>Register to your Account</Text>
+
+        <View style={styles.inputContainer}>
+          <Feather name="phone" size={24} color="black" style={styles.icon}/>
           <TextInput
-            value={name}
-            onChangeText={(text) => setName(text)}
-            style={{
-              color: "gray",
-              marginVertical: 10,
-              width: 300,
-              fontSize: name ? 16 : 16,
-            }}
-            placeholder="enter your name"
+            value={phone}
+            onChangeText={(text) => setPhone(text)}
+            style={styles.input}
+            placeholder="Enter your phone number"
+            placeholderTextColor="#888"
+            keyboardType="phone-pad"
           />
         </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-            backgroundColor: "#D0D0D0",
-            paddingVertical: 5,
-            borderRadius: 5,
-            marginTop: 30,
-          }}
-        >
+        <View style={styles.inputContainer}>
           <MaterialIcons
-            style={{ marginLeft: 8 }}
             name="email"
             size={24}
             color="gray"
+            style={styles.icon}
           />
-
           <TextInput
             value={email}
             onChangeText={(text) => setEmail(text)}
-            style={{
-              color: "gray",
-              marginVertical: 10,
-              width: 300,
-              fontSize: password ? 16 : 16,
-            }}
-            placeholder="enter your Email"
+            style={styles.input}
+            placeholder="Enter your email"
+            placeholderTextColor="#888"
+            keyboardType="email-address"
           />
         </View>
-      </View>
 
-      <View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-            backgroundColor: "#D0D0D0",
-            paddingVertical: 5,
-            borderRadius: 5,
-            marginTop: 30,
-          }}
-        >
-          <AntDesign
-            name="lock1"
-            size={24}
-            color="gray"
-            style={{ marginLeft: 8 }}
-          />
-
+        <View style={styles.inputContainer}>
+          <AntDesign name="lock1" size={24} color="gray" style={styles.icon} />
           <TextInput
             value={password}
             onChangeText={(text) => setPassword(text)}
-            secureTextEntry={true}
-            style={{
-              color: "gray",
-              marginVertical: 10,
-              width: 300,
-              fontSize: email ? 16 : 16,
-            }}
-            placeholder="enter your Password"
+            secureTextEntry
+            style={styles.input}
+            placeholder="Enter your password"
+            placeholderTextColor="#888"
           />
         </View>
-      </View>
 
-      <View
-        style={{
-          marginTop: 12,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text>Keep me logged in</Text>
+        <Pressable onPress={handleRegister} style={styles.registerButton}>
+          <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
 
-        <Text style={{ color: "#007FFF", fontWeight: "500" }}>
-          Forgot Password
-        </Text>
-      </View>
-
-      <View style={{ marginTop: 80 }} />
-
-      <Pressable
-        // onPress={handleRegister}
-        style={{
-          width: 200,
-          backgroundColor: "#FEBE10",
-          borderRadius: 6,
-          marginLeft: "auto",
-          marginRight: "auto",
-          padding: 15,
-        }}
-      >
-        <Text
-          style={{
-            textAlign: "center",
-            color: "white",
-            fontSize: 16,
-            fontWeight: "bold",
-          }}
+        <Pressable
+          onPress={() => navigation.navigate("Login")}
+          style={styles.signInLink}
         >
-          Register
-        </Text>
-      </Pressable>
+          <Text style={styles.signInText}>
+            Already have an account? Sign In
+          </Text>
+        </Pressable>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
 
-      <Pressable
-        onPress={() => navigation.navigate("Login")}
-        style={{ marginTop: 15 }}
-      >
-        <Text style={{ textAlign: "center", color: "gray", fontSize: 16 }}>
-          Already have an account? Sign In
-        </Text>
-      </Pressable>
-    </KeyboardAvoidingView>
-  </SafeAreaView>
-  )
-}
+export default RegisterScreen;
 
-export default RegisterScreen
-
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+    alignItems: "center",
+    paddingTop: 50,
+  },
+  logo: {
+    marginTop: 50,
+    width: 300,
+    height: 100,
+  },
+  imageLogo: {
+    width: "100%",
+    height: "100%",
+  },
+  formContainer: {
+    marginTop: 20,
+    width: "90%",
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#041E42",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F0F0",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  icon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "black",
+  },
+  registerButton: {
+    backgroundColor: "#FEBE10",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  signInLink: {
+    marginTop: 15,
+  },
+  signInText: {
+    color: "gray",
+    fontSize: 16,
+    textAlign: "center",
+  },
+});

@@ -37,8 +37,9 @@ const ProfileScreen = ({ navigation }: any) => {
           <>
             <View style={styles.header}>
               <Image
-                source={{ uri: currentUser?.avatar }}
+                source={{ uri: currentUser?.avatar}}
                 style={styles.avatar}
+                
               />
               <Text style={styles.name}>{currentUser?.username}</Text>
               <Text style={styles.email}>{currentUser?.email}</Text>

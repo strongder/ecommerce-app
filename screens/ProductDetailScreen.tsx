@@ -103,26 +103,39 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
           >
             {product.imageUrls && (
               <Swiper
-                showsButtons={false}
-                width={viewportWidth}
-                height={200}
-                style={{ borderWidth: 1, marginBottom: 10 }}
-              >
-                {product?.imageUrls?.map((item: any, index: number) => (
-                  <View key={index}>
-                    <Image
-                      source={{ uri: item.imageUrl }}
-                      style={styles.image}
-                    />
-                  </View>
-                ))}
-              </Swiper>
+              showsButtons={false}
+              width={viewportWidth}
+              height={200}
+              style={{ borderWidth: 1, marginBottom: 10 }}
+            >
+              {product?.imageUrls?.map((item: any, index: number) => (
+                <View
+                  key={index}
+                  style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: 200, // ensure this matches the height you want
+                  }}
+                >
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.image}
+                  />
+                </View>
+              ))}
+            </Swiper>
             )}
           </View>
           <Text style={styles.title}>{product.name}</Text>
+
+          <View style ={{flexDirection:"row", gap: 20}}>
           <Text style={styles.price}>
-            {product?.price?.toLocaleString("de-DE")}Đ
+            {(product?.price*(1-product.discount/100))?.toLocaleString("de-DE")}VNĐ
           </Text>
+          {product.discount > 0 && (
+              <Text style={styles.discount}>{product?.price?.toLocaleString("de-DE")}</Text>
+          )}
+          </View>
           <View style={styles.ratingContainer}>
             <Text style={styles.rating}>Đánh giá: {product.rating} / 5</Text>
             <Image
@@ -214,6 +227,7 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
                   textAlign: "center",
                   fontSize: 16,
                   paddingVertical: 5,
+                  paddingBottom: 20,
                 }}
               >
                 Xem thêm
@@ -221,9 +235,9 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
             </Pressable>
           </View>
 
-          <View style={styles.relatedProductsSection}>
+          {/* <View style={styles.relatedProductsSection}>
             <Text style={styles.relatedProductsTitle}>Related Products</Text>
-          </View>
+          </View> */}
         </ScrollView>
       )}
     </>
@@ -264,7 +278,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#e60023",
-    marginVertical: 5,
+  },
+  discount: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textDecorationLine: "line-through",
+    color: "red",
   },
   ratingContainer: {
     flexDirection: "row",

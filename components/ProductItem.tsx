@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
 const ProductItem = ({ product }: any) => {
-  console.log(product.discount);
   return (
     <View style={styles.container}>
       {product.discount > 0 && (
@@ -12,12 +11,12 @@ const ProductItem = ({ product }: any) => {
       )}
 
       <Image
-        source={{ uri: product.imageUrls[0].imageUrl }}
+        source={{ uri: product?.imageUrls[0]?.imageUrl }}
         style={styles.image}
       />
       <View style={styles.info}>
         <Text style={styles.name}>{product.name}</Text>
-        <Text style={styles.price}>{product.price} VNĐ</Text>
+        <Text style={styles.price}>{(product.price*((100-product.discount)/100)).toLocaleString('vi-Vi')} VNĐ</Text>
         <Text style={styles.sold}>Đã bán: {product.quantitySold}</Text>
         <Text style={styles.rating}>Đánh gia: {product.rating} ⭐</Text>
       </View>
