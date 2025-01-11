@@ -18,7 +18,6 @@ import BottomTabs from "../components/BottomTabs";
 import PaymentResultScreen from "../screens/PaymentResultScreen";
 import ProductReviewScreen from "../screens/ProductReviewScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
-
 const StackNaviagator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -39,6 +38,7 @@ const StackNaviagator = () => {
           component={RegisterScreen}
           options={{ headerShown: false }}
         />
+      
         <Stack.Screen
           name="Checkout"
           component={CheckoutScreen}

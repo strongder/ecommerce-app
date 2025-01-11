@@ -199,16 +199,17 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: "white",
     borderRadius: 3,
-    height: 30,
+    height: 40,
     flex: 1,
   },
   searchIcon: {
     paddingLeft: 10,
   },
   searchInput: {
+     height: 40,
     flex: 1,
-    fontSize: 18,
   },
+  
   bannerContainer: {
     padding: 10,
   },

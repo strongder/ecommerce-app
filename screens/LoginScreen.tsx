@@ -126,6 +126,12 @@ const LoginScreen = () => {
         >
           <Text style={styles.registerText}>Chưa có tài khoản? Đăng ký</Text>
         </Pressable>
+        {/* <Pressable
+          onPress={() => navigation.navigate("WebAuthn")}
+          style={styles.registerLink}
+        >
+          <Text style={styles.registerText}>Đăng nhập bằng vân tay</Text>
+        </Pressable> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
