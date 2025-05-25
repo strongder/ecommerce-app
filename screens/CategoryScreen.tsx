@@ -62,7 +62,7 @@ const CategoryScreen = ({ navigation }: any) => {
           renderItem={({ item }) => (
             <Pressable
               onPress={() =>
-                navigation.navigate("ProductDetail", { product: item })
+                navigation.navigate("ProductDetail", { productId: item.id })
               }
               style={styles.productItem}
             >

@@ -32,7 +32,6 @@ const CartScreen = ({ navigation }: any) => {
         cartItemId: id,
         userId: currentUser.id,  // Đảm bảo currentUser.id có giá trị đúng
     }
-    console.log(param);
     dispatch(removeProductFromCart({ param }));  // Truyền param vào như đã định
 };
   const updateItem = (id: number, quantity: number) => {
@@ -42,7 +41,6 @@ const CartScreen = ({ navigation }: any) => {
       quantity: quantity,
       userId: currentUser.id,
     }
-    console.log(param);
     dispatch(updateProductInCart({ param }));
   }
 

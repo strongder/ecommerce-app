@@ -150,7 +150,7 @@ const SearchScreen = ({ navigation, route }: any) => {
         data={results}
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => navigation.navigate("ProductDetail", { product: item })}
+            onPress={() => navigation.navigate("ProductDetail", { productId: item.id })}
             style={styles.productItem}
           >
             <ProductItem product={item} />

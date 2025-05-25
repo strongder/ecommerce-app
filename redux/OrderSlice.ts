@@ -72,7 +72,7 @@ export const completeOrder: any = createAsyncThunk(
   }
 );
 
-export const updatePaymentMethod = createAsyncThunk(
+export const updatePaymentMethod: any = createAsyncThunk(
   "orders/updatePaymentMethod",
   async (param: { orderId: string; paymentMethod: string }) => {
     console.log("param", param);

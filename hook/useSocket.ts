@@ -9,7 +9,7 @@ const useSocket = (topic: any, token:any, handleReceivedData: any) => {
     if (!token) {
       return;
     }
-    const socket = new SockJS(`http://${IP}:8080/ws`);
+    const socket = new SockJS(`https://${IP}:8080/ws`);
     const client = Stomp.over(socket);
     client.connect(
       {},
