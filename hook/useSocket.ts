@@ -1,7 +1,7 @@
 import Stomp from "stompjs";
 import SockJS from "sockjs-client";
 import { useEffect, useState } from "react";
-import { IP } from "../api";
+
 
 const useSocket = (topic: any, token:any, handleReceivedData: any) => {
   const [connected, setConnected] = useState(false);
@@ -9,7 +9,7 @@ const useSocket = (topic: any, token:any, handleReceivedData: any) => {
     if (!token) {
       return;
     }
-    const socket = new SockJS(`https://${IP}:8080/ws`);
+    const socket = new SockJS(`https://thanhtx.io.vn/ws`);
     const client = Stomp.over(socket);
     client.connect(
       {},

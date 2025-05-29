@@ -15,7 +15,11 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import ProductItem from "../components/ProductItem";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategory, fetchParentCategoryById, fetchParentCategory } from "../redux/CategorySlice";
+import {
+  fetchCategory,
+  fetchParentCategoryById,
+  fetchParentCategory,
+} from "../redux/CategorySlice";
 import {
   fetchProduct,
   fetchProductByCategory,
@@ -59,8 +63,21 @@ const HomeScreen = () => {
     dispatch(fetchProductByDiscount({ param: newParam }));
   }, [dispatch, pageProductDiscount]);
 
+
+  useEffect(() => {
+    fetch("https://thanhtx.io.vn/api/v1/products", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.text())
+      .then((text) => console.log("111111API response:", text))
+      .catch((err) => console.log("11111111111Fetch error:", err.message));
+  }, []);
+
   const handleSearch = () => {
-    navigation.navigate("SearchPage", {searchTerm});
+    navigation.navigate("SearchPage", { searchTerm });
   };
 
   const handleSelectCategory = async (id: number) => {
@@ -166,8 +183,7 @@ const HomeScreen = () => {
             dataDiscount,
             setpageProductDiscount
           )}
-        {listProduct &&
-          renderProductList("Sản phẩm", data, setpageProduct)}
+        {listProduct && renderProductList("Sản phẩm", data, setpageProduct)}
       </ScrollView>
     </SafeAreaView>
   );
@@ -206,10 +222,10 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   searchInput: {
-     height: 40,
+    height: 40,
     flex: 1,
   },
-  
+
   bannerContainer: {
     padding: 10,
   },

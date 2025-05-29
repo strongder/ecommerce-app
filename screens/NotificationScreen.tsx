@@ -17,6 +17,7 @@ import { fetchCurrentUser } from "../redux/UserSlice";
 
 const NotificationScreen = ({ notifications, setUnreadCount }: any) => {
   const navigation: any = useNavigation();
+  console.log("NotificationScreen", notifications);
   const dispatch = useDispatch();
   useEffect(() => {
     configAxios(navigation);
